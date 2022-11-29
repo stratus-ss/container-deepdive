@@ -45,7 +45,7 @@ The first example we are going to walk through is creating two Net namespaces an
 
 In the diagram below you can see that each end of the 'cable' is labeled. I recommend using obvious names, although the naming convention you choose is completely arbitrary.
 
-![net_namespaces-ptp.png](/namespaces/net_namespaces-ptp.png)
+![net_namespaces-ptp.png](net_namespaces-ptp.png)
 
 In order to accomplish this let's set up some variables to make our life easier, and the code more repeatable:
 
@@ -253,7 +253,7 @@ ovs-vsctl add-br NAMESPACE-DEMO
 
 Just as before we are going to create some `veth peer` interfaces, but this time we are only going to specify one side of the "cable". That is because we will be adding the other end of the 'cable' to the virtual switch. When we are done it will look something like this:
 
-![net_namespaces-ovs.png](/namespaces/net_namespaces-ovs.png)
+![net_namespaces-ovs.png](net_namespaces-ovs.png)
 
 Adding the interfaces should look very familiar by now:
 
