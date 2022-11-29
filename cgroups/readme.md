@@ -68,7 +68,7 @@ Each type of controller, (cpu, blkio, memory etc) are subdivided into a tree-lik
 
 
 
-![cgroup_diagram.png](/cgroups/cgroup_diagram.png)
+![cgroup_diagram.png](cgroup_diagram.png)
 
 In the diagram above, you can see that it is possible to have `pid 1` in memory, disk i/o and cpu control groups. The CGroups are created per resource type and have no association with each other. That means you could have a `database` group associated with all of the controllers but the groups are treated as independent groups. These groups, similar to GIDs, are assigned a numeric value upon creation and under the hood, the kernel uses these values to determine resource allocation and not a friendly name. To think of it another way, assume that each CGroup name, once attached to a controller, is renamed to the name of the controller + the name of your choosing. So a group called `database` in the `memory` controller can actually be thought to be `memory-database`. Thus, there is no relation to a `database` group associated with the controller `cpu` as the friendly name can be thought of as `cpu-database`.
 
@@ -96,31 +96,31 @@ This little bit of background information can be an important distinction for th
 
 CPU shares provide tasks in a cgroup with a relative amount of CPU time. Once the system has mounted the `cpu` cgroup controller, you can use the file `cpu.shares` to define the number of shares allocated to the cgroup. CPU time is determined by dividing the CGroup's CPUShares by the total number of defined CPUShares on the system. This CPU time math can get quite complicated so let's take a look at some diagrams to help clarify things.
 
-![cgls_-_openshift.png](/cgroups/cgls_-_openshift.png)
+![cgls_-_openshift.png](cgls_-_openshift.png)
 
 The above diagram represents some of the most common elements on a RHEL 7 OpenShift Container Platform control plane server. Every process on this system starts with the `/` CGroup. All of these.
 
 In RHEL, this begins with the root `/` cgroup with 1024 shares and 100% of CPU resources. The rest of the resources are divided equally amongst the groups `/system.slice`, `/user.slice`, and `/kubepod.slice` each with an equal weight of 1024 by default as seen below:
 
-![cgls_openshift_1024.png](/cgroups/cgls_openshift_1024.png)
+![cgls_openshift_1024.png](cgls_openshift_1024.png)
 
 
 In this scenario the logic is pretty straight forward: each slice can use only 33% of the CPUShares in the event that all CGroups are demanding shares at the same time. The math is pretty simple:
 
-![cpushares_words.png](/cgroups/cpushares_words.png)
+![cpushares_words.png](cpushares_words.png)
 
 
 And when you plug in the numbers:
 
-![cpushares_numbers.png](/cgroups/cpushares_numbers.png)
+![cpushares_numbers.png](cpushares_numbers.png)
 
 However, what if you decided to nest groups, or change the weight of groups at the same level? Below is an example of the nested groups:
 
-![cgroups_cpushares_weighted.png](/cgroups/cgroups_cpushares_weighted.png)
+![cgroups_cpushares_weighted.png](cgroups_cpushares_weighted.png)
 
 In this example you can see that I have created a CGroup for different users. Here is where the math gets interesting. At first you would think that the following equation would work just fine:
 
-![cpushares_numbers_multiple_users_wrong.png](/cgroups/cpushares_numbers_multiple_users_wrong.png)
+![cpushares_numbers_multiple_users_wrong.png](cpushares_numbers_multiple_users_wrong.png)
 
 However, this is only 23% of the 33% alloted to the `user.slice`. That means, user 1 has a total of approximately 7.6% of total CPU time based on these weights in the event of resource contention.
 
@@ -199,7 +199,7 @@ Now that we have some CGroups setup, it's time to generate some load. For this, 
 cat /dev/urandom
 ```
 You can see the results in `top`:
-![manual_cgroup_top.png](/cgroups/manual_cgroup_top.png)
+![manual_cgroup_top.png](manual_cgroup_top.png)
 
 > **IMPORTANT NOTE:** Remember that the CPUShares are based off the top level CGroup which is unconstrained by default. This means that should a process higher up in the tree demand CPUShares, the system will give that process priority. This can confuse people. It's very important to have a visual representation of the CGroup layout on a system to avoid confusion.
 {.is-warning}
@@ -223,11 +223,11 @@ echo 2023 > user1/tasks
 
 Here is the result of adding a process into a CGroup as seen in `top`:
 
-![manual_cgroup_top_2048_only.png](/cgroups/manual_cgroup_top_2048_only.png)
+![manual_cgroup_top_2048_only.png](manual_cgroup_top_2048_only.png)
 
 As you can see in the screenshot above, the process in our new CGroup is receiving roughly half of the CPU time. This is because of the equation from earlier:
 
-![cpushares_2048.png](/cgroups/cpushares_2048.png)
+![cpushares_2048.png](cpushares_2048.png)
 
 Let's go ahead and add the other two processes into their respective CGroups and observe the results:
 ```
@@ -235,11 +235,11 @@ echo 2024 > user2/tasks
 echo 2025 > user3/tasks
 ```
 
-![manual_cgroup_top_3_groups.png](/cgroups/manual_cgroup_top_3_groups.png)
+![manual_cgroup_top_3_groups.png](manual_cgroup_top_3_groups.png)
 
 We can now see that the weighting has taken affect with the CGroup `user1` taking up about 61% of the CPU time:
 
-![cpushares_single_cgroup_calculation.png](/cgroups/cpushares_single_cgroup_calculation.png)
+![cpushares_single_cgroup_calculation.png](cpushares_single_cgroup_calculation.png)
 
 The remaining time is split between `user2` and `user3`.
 
@@ -393,7 +393,7 @@ systemctl start sha256sum.service
 
 Instead of showing you the output from `top`, now would be a good time to introduce you to `systemd-cgtop`. It works in a similar fashion to regular `top` except it gives you a breakdown per slice, and then again by services in each slice. This can be very helpful in determining whether you are making good use of CGroups in general on your system. As seen below, `systemd-cgtop` shows both the aggregation for all services in a particular slice as part of the overall system, but also the resource utilization of each service in a slice:
 
-![cgtop1.png](/cgroups/cgtop1.png)
+![cgtop1.png](cgtop1.png)
 
 ### `systemctl set-property`
 
@@ -433,7 +433,7 @@ systemctl start md5sum.service cat.service sha256sum.service
 
 As you can see from the screenshot below, the changes appear to be successful. `sha256sum.service` is configured for 2048 CPUShares, while `md5sum.service` has 1024 and finally `cat.service` has 256.
 
-![cgtop2.png](/cgroups/cgtop2.png)
+![cgtop2.png](cgtop2.png)
 
 
 # Wrap Up
