@@ -52,7 +52,7 @@ uid=1000(container-user) gid=1000(container-user) groups=1000(container-user)
 
 It is important to note that unless intentionally restricted by the system administrator, any user can, in theory create a new user namespace. This however, does not provide any obfuscation from administrators on the system itself. User Namespaces are a hierarchy. Consider the diagram below:
 
-![user_namespace.png](/namespaces/user_namespace.png)
+![user_namespace.png](user_namespace.png)
 
 In this diagram, the black lines indicate the flow of creation. The user `container-user` creates a namespace for a user called `app-user`. In theory this would be a web front end or other application. The `app-user` then creates a user namespace for `java-user`. In this namespace the `java-user` creates a namespace for the `db-user`. 
 
@@ -167,7 +167,7 @@ The biggest advantage to the user namespace is the ability to run containers wit
 
 In the diagram below, all of the namespaces on a system are owned by the original, full `root` user namespace. This relationship has the potential to bi-directional. If a process running in the Net namespace is running as root, it has the ability to impact all other processes owned by the `root` user namespace. However, while creating an unprivileged user namespace allows that new user namespace to access resources in other namespaces, it may not alter them as it does not 'own' them. Thus, while a process in the unprivileged namespace can `ping` an IP (which relies on the `net` namespace), it may not change the network configuration of the host.
 
-![namespace_inheritance.png](/namespaces/namespace_inheritance.png)
+![namespace_inheritance.png](namespace_inheritance.png)
 
 
 Many things outside of what we think of as Linux containers make use of namespaces. The Linux packaging format [Flatpak](https://www.flatpak.org/) makes use of user namespaces as well as some other technology in order to provide an application sandbox. Flatpaks bundle all of an applications’ libraries in the same package distribution file. This allows a Linux machine to receive the most up to date applications without having to worry that you have the correct version of `glibc` installed, for example. The ability to have these in their own user namespace means that (in theory) a misbehaving process inside of the flatpak cannot change (or possibly even access) any files or processes outside the namespace.
