@@ -181,7 +181,7 @@ root
 
 Because `proc` is a special type of mount related to the `pid` namespace we cannot mount it even though we are in our own `mount` namespace. This goes back to the capability inheritance that we talked about earlier. We'll pick this up discussion in the next article when we start discussing the `pid` namespace. However, as a reminder about inheritance, have a look at the diagram below:
 
-![mount_namespace.png](/namespaces/mount_namespace.png)
+![mount_namespace.png](mount_namespace.png)
 
 In the next article we'll rehash this diagram but if you have been following along since the beginning, you should be able to make some inferences before then. 
 
